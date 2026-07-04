@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thiệp mời — Dương Hồng Anh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FCF6EF;
+    --blush:#F5E3DD;
+    --rose:#C97B86;
+    --rose-deep:#B15F6D;
+    --mauve:#7D5A5A;
+    --gold:#C9A66B;
+    --ink:#4A3B38;
+    --shadow: 0 20px 50px rgba(122, 90, 90, 0.18);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background: radial-gradient(circle at 20% 15%, #FFFDFB 0%, var(--cream) 45%, var(--blush) 100%);
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+
+  .ambient-hearts{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:hidden;
+  }
+  .ambient-hearts span{
+    position:absolute;
+    bottom:-40px;
+    color:var(--rose);
+    opacity:0.18;
+    font-size:18px;
+    animation:floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.22; }
+    90%{ opacity:0.18; }
+    100%{ transform:translateY(-115vh) translateX(20px) rotate(25deg); opacity:0; }
+  }
+
+  .scene{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 18px;
+  }
+
+  /* ---------- Envelope ---------- */
+  .envelope-wrap{
+    text-align:center;
+    animation:appear 1s ease both;
+  }
+
+  .envelope{
+    position:relative;
+    width:280px;
+    height:190px;
+    margin:0 auto;
+    cursor:pointer;
+    perspective:1200px;
+  }
+  .env-body{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(155deg, #EFCFC9 0%, var(--rose) 100%);
+    border-radius:10px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .env-body::before{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0; top:38%;
+    background: linear-gradient(160deg, #E7BEB8, #C97B86);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  .env-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:60%;
+    background: linear-gradient(200deg, #F3D9D3, #D98B94);
+    clip-path: polygon(0 0, 100% 0, 50% 68%);
+    transform-origin: top center;
+    transition: transform 0.9s cubic-bezier(.6,.1,.3,1);
+    z-index:3;
+    border-radius: 10px 10px 0 0;
+  }
+  .seal{
+    position:absolute;
+    top:50%; left:50%;
+    width:46px; height:46px;
+    margin:-23px 0 0 -23px;
+    background: radial-gradient(circle at 35% 30%, #D9AE79, var(--gold));
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff8f2;
+    font-size:20px;
+    box-shadow:0 6px 14px rgba(120,80,40,0.3);
+    z-index:4;
+    transition: transform 0.5s ease;
+  }
+  .envelope:hover .seal{ transform: scale(1.12) rotate(-6deg); }
+
+  .envelope.open .env-flap{ transform: rotateX(165deg); }
+  .envelope.open .seal{ opacity:0; transform: scale(0.4); transition: opacity 0.35s ease, transform 0.35s ease; }
+
+  .letter-peek{
+    position:absolute;
+    left:8%; right:8%;
+    bottom:8px;
+    height:0;
+    background: var(--cream);
+    border-radius:6px 6px 0 0;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+    transition: height 0.6s ease 0.35s, transform 0.6s ease 0.35s;
+    z-index:2;
+  }
+  .envelope.open .letter-peek{
+    height:78%;
+    transform: translateY(-14px);
+  }
+
+  .envelope-label{
+    margin-top:22px;
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:19px;
+    color:var(--mauve);
+    letter-spacing:0.3px;
+  }
+  .envelope-hint{
+    margin-top:4px;
+    font-size:13px;
+    color:var(--rose-deep);
+    opacity:0.85;
+  }
+  .envelope-wrap.hide{
+    animation: fadeOut 0.5s ease forwards;
+  }
+  @keyframes fadeOut{
+    to{ opacity:0; transform:scale(0.92) translateY(-6px); pointer-events:none; }
+  }
+
+  /* ---------- Card ---------- */
+  .card{
+    display:none;
+    width:100%;
+    max-width:480px;
+    background: linear-gradient(180deg, #FFFDFB, var(--cream));
+    border-radius:22px;
+    padding:44px 34px 36px;
+    box-shadow: var(--shadow);
+    text-align:center;
+    position:relative;
+    border: 1px solid rgba(201,166,107,0.35);
+  }
+  .card.show{
+    display:block;
+    animation: cardIn 0.8s cubic-bezier(.2,.7,.3,1) both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:scale(0.85) translateY(18px); }
+    to{ opacity:1; transform:scale(1) translateY(0); }
+  }
+
+  .eyebrow{
+    font-size:12.5px;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:700;
+  }
+
+  .name{
+    font-family:'Dancing Script', cursive;
+    font-size:46px;
+    color:var(--rose-deep);
+    margin:6px 0 2px;
+    line-height:1.15;
+  }
+
+  .subtitle{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:16px;
+    color:var(--mauve);
+    margin-bottom:22px;
+  }
+
+  .divider{
+    width:70px;
+    height:2px;
+    margin:0 auto 22px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .intro-text{
+    font-size:15px;
+    line-height:1.85;
+    color:var(--ink);
+    margin-bottom:26px;
+  }
+  .intro-text br{ content:""; display:block; }
+
+  .timeline{
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:26px;
+  }
+  .timeline-item{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    padding:12px 14px;
+    border-radius:14px;
+    background: rgba(245,227,221,0.5);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .timeline-item:hover{
+    background: var(--blush);
+    transform: translateX(5px);
+  }
+  .t-icon{
+    font-size:20px;
+    width:34px; height:34px;
+    flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff;
+    border-radius:50%;
+    box-shadow:0 3px 8px rgba(122,90,90,0.12);
+    transition: transform 0.35s ease;
+  }
+  .timeline-item:hover .t-icon{ transform: scale(1.15) rotate(-6deg); }
+  .t-time{
+    font-weight:700;
+    color:var(--rose-deep);
+    font-size:13.5px;
+    display:block;
+    margin-bottom:2px;
+    letter-spacing:0.3px;
+  }
+  .t-desc{
+    font-size:14px;
+    color:var(--ink);
+    line-height:1.5;
+  }
+
+  .dresscode-item .t-time{ margin-bottom:6px; }
+  .dc-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--ink);
+    line-height:1.5;
+    margin-top:4px;
+  }
+  .dc-gender{
+    flex:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#fff;
+    color:var(--rose-deep);
+    font-weight:700;
+    font-size:12.5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 5px rgba(122,90,90,0.12);
+  }
+
+  .quote-box{
+    position:relative;
+    padding:20px 18px 8px;
+    margin-bottom:22px;
+  }
+  .quote-mark{
+    font-family:'Playfair Display', serif;
+    font-size:40px;
+    color:var(--gold);
+    opacity:0.5;
+    line-height:0;
+    position:relative;
+    top:14px;
+  }
+  .quote-text{
+    font-family:'Dancing Script', cursive;
+    font-size:23px;
+    color:var(--mauve);
+    line-height:1.6;
+    transition: text-shadow 0.4s ease, transform 0.4s ease;
+  }
+  .quote-box:hover .quote-text{
+    text-shadow: 0 0 18px rgba(201,123,134,0.35);
+    transform: scale(1.015);
+  }
+
+  .heart-strip{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin-bottom:6px;
+  }
+  .heart-strip span{
+    font-size:20px;
+    color:var(--rose);
+    cursor:default;
+    transition: transform 0.3s ease, color 0.3s ease;
+    display:inline-block;
+  }
+  .heart-strip span:hover{
+    color:var(--rose-deep);
+    transform: scale(1.4) translateY(-3px);
+  }
+
+  .signoff{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:14.5px;
+    color:var(--mauve);
+    opacity:0.85;
+    margin-top:14px;
+  }
+
+  @media (max-width:420px){
+    .name{ font-size:38px; }
+    .card{ padding:36px 22px 30px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+    .ambient-hearts{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient-hearts" id="ambientHearts"></div>
+
+<div class="scene">
+
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope" id="envelope">
+      <div class="env-body"></div>
+      <div class="letter-peek"></div>
+      <div class="env-flap"></div>
+      <div class="seal">♥</div>
+    </div>
+    <p class="envelope-label">Gửi Dương&nbsp;Hồng&nbsp;Anh</p>
+    <p class="envelope-hint">Chạm để mở thiệp 💌</p>
+  </div>
+
+  <div class="card" id="card">
+    <p class="eyebrow">Kỷ niệm ngày yêu</p>
+    <h1 class="name">Dương Hồng Anh</h1>
+    <p class="subtitle">Anh có một lời&nbsp;mời nhỏ dành&nbsp;cho em</p>
+    <div class="divider"></div>
+
+    <p class="intro-text">
+      Ngày 7/7/2024, hai&nbsp;ta đã bắt&nbsp;đầu hành&nbsp;trình của tình&nbsp;yêu.<br>
+      Hôm&nbsp;nay là ngày kỷ&nbsp;niệm 2&nbsp;năm, anh muốn dành&nbsp;chọn thời&nbsp;gian để cùng em tận&nbsp;hưởng khoảnh&nbsp;khắc ý&nbsp;nghĩa này.<br>
+      Dưới đây là lịch&nbsp;trình cho hai&nbsp;đứa mình nhé.
+    </p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="t-icon">🏠</span>
+        <div>
+          <span class="t-time">16:00</span>
+          <span class="t-desc">Anh sẽ có&nbsp;mặt tại&nbsp;nhà để&nbsp;đón em</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <span class="t-icon">☕</span>
+        <div>
+          <span class="t-time">16:10 — 17:30</span>
+          <span class="t-desc">Cà&nbsp;phê chill và mở&nbsp;quà</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <span class="t-icon">🍲</span>
+        <div>
+          <span class="t-time">18:00 — 20:00</span>
+          <span class="t-desc">Dùng&nbsp;bữa tại nhà&nbsp;hàng Haidilao, Vincom Phạm&nbsp;Ngọc&nbsp;Thạch</span>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <span class="t-icon">🎬</span>
+        <div>
+          <span class="t-time">20:00 — 23:00</span>
+          <span class="t-desc">Tuỳ em&nbsp;chọn: xem&nbsp;phim hoặc dành thời&nbsp;gian riêng&nbsp;tư</span>
+        </div>
+      </div>
+      <div class="timeline-item dresscode-item">
+        <span class="t-icon">👔</span>
+        <div>
+          <span class="t-time">Dress code gợi ý</span>
+          <div class="dc-row"><span class="dc-gender">♂</span><span>Áo sơ mi, quần âu, giày tây</span></div>
+          <div class="dc-row"><span class="dc-gender">♀</span><span>Trang điểm xinh xắn, diện đồ tinh tươm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-box">
+      <div class="quote-mark">"</div>
+      <p class="quote-text">Thời&nbsp;gian rồi sẽ đi&nbsp;qua, còn kỷ&nbsp;niệm của chúng&nbsp;ta sẽ tồn&nbsp;tại mãi&nbsp;mãi. Cảm&nbsp;ơn em đã ở bên&nbsp;cạnh anh. Anh yêu&nbsp;em.</p>
+    </div>
+
+    <div class="heart-strip">
+      <span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Ambient floating hearts
+  const ambient = document.getElementById('ambientHearts');
+  const heartChars = ['♥','❤'];
+  for(let i=0;i<10;i++){
+    const el = document.createElement('span');
+    el.textContent = heartChars[Math.floor(Math.random()*heartChars.length)];
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.fontSize = (14 + Math.random()*14) + 'px';
+    el.style.animationDuration = (10 + Math.random()*10) + 's';
+    el.style.animationDelay = (Math.random()*10) + 's';
+    ambient.appendChild(el);
+  }
+
+  // Envelope -> card
+  const envelopeWrap = document.getElementById('envelopeWrap');
+  const envelope = document.getElementById('envelope');
+  const card = document.getElementById('card');
+
+  envelope.addEventListener('click', () => {
+    if (envelope.classList.contains('open')) return;
+    envelope.classList.add('open');
+    setTimeout(() => {
+      envelopeWrap.classList.add('hide');
+    }, 750);
+    setTimeout(() => {
+      envelopeWrap.style.display = 'none';
+      card.classList.add('show');
+    }, 1150);
+  });
+</script>
+
+</body>
+</html>
