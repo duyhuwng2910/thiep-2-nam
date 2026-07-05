@@ -63,6 +63,43 @@
     padding:32px 18px;
   }
 
+  /* ---------- Start overlay ---------- */
+  .start-overlay{
+    position:fixed;
+    inset:0;
+    z-index:7;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    background: radial-gradient(circle at 20% 15%, #FFFDFB 0%, var(--cream) 45%, var(--blush) 100%);
+    cursor:pointer;
+  }
+  .start-heart{
+    font-size:56px;
+    color:var(--rose);
+    animation: heartBeat 1.6s ease-in-out infinite;
+    text-shadow: 0 6px 24px rgba(201,123,134,0.35);
+  }
+  @keyframes heartBeat{
+    0%,100%{ transform:scale(1); }
+    12%{ transform:scale(1.18); }
+    24%{ transform:scale(1); }
+    36%{ transform:scale(1.12); }
+    48%{ transform:scale(1); }
+  }
+  .start-text{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:18px;
+    color:var(--mauve);
+    letter-spacing:0.4px;
+  }
+  .start-overlay.done{
+    animation: introFade 0.8s ease forwards;
+  }
+
   /* ---------- Intro ---------- */
   .intro{
     position:fixed;
@@ -450,6 +487,12 @@
 
 <div class="ambient-hearts" id="ambientHearts"></div>
 
+<!-- Start overlay: chạm 1 lần để nhạc được phép phát ngay từ đầu -->
+<div class="start-overlay" id="startOverlay">
+  <span class="start-heart">♥</span>
+  <p class="start-text">Chạm để bắt đầu</p>
+</div>
+
 <!-- Intro sequence -->
 <div class="intro" id="intro">
   <p class="intro-line" id="introLine"></p>
@@ -612,8 +655,8 @@
   // Chạm để bỏ qua intro
   intro.addEventListener('click', finishIntro);
 
-  // Bắt đầu intro sau 0.6s để trang tải xong
-  setTimeout(() => showLine(0), 600);
+  // Intro không tự chạy nữa — sẽ bắt đầu khi chạm màn hình "Chạm để bắt đầu"
+  // (xem phần Start overlay bên dưới)
 
   // ---------- Music ----------
   const bgMusic = document.getElementById('bgMusic');
@@ -668,6 +711,21 @@
     }
   });
 
+  // ---------- Start overlay ----------
+  const startOverlay = document.getElementById('startOverlay');
+  let started = false;
+
+  startOverlay.addEventListener('click', () => {
+    if(started) return;
+    started = true;
+    startMusic();                       // chạm = user gesture → trình duyệt cho phép phát nhạc
+    startOverlay.classList.add('done');
+    setTimeout(() => {
+      startOverlay.style.display = 'none';
+      showLine(0);                      // bắt đầu intro 4 câu trên nền nhạc
+    }, 700);
+  });
+
   // ---------- Envelope -> card ----------
   const envelope = document.getElementById('envelope');
   const card = document.getElementById('card');
@@ -675,7 +733,7 @@
   envelope.addEventListener('click', () => {
     if (envelope.classList.contains('open')) return;
     envelope.classList.add('open');
-    startMusic(); // click là user gesture nên trình duyệt cho phép phát nhạc
+    if(!musicOn) startMusic();          // dự phòng nếu nhạc chưa phát được từ đầu
     setTimeout(() => {
       envelopeWrap.classList.add('hide');
     }, 750);
